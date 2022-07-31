@@ -64,8 +64,6 @@ export class HomeComponent {
     price: this.currencyPipe.transform(item.price, item.currency),
   }));
 
-  // TODO - transform inventory array to apply currency conversion
-
   actionButtonFn = (row: any) => (row.inStock > 0 ? 'Buy now' : null);
 
   constructor(private currencyPipe: CurrencyPipe) {}
