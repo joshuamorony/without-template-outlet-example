@@ -1,4 +1,4 @@
-import { CommonModule } from '@angular/common';
+import { CommonModule, CurrencyPipe } from '@angular/common';
 import { Component, NgModule } from '@angular/core';
 import { RouterModule } from '@angular/router';
 import { TableComponentModule } from '../shared/ui/table.component';
@@ -18,20 +18,12 @@ import { TableComponentModule } from '../shared/ui/table.component';
     <app-table
       [data]="inventory"
       [headers]="['Item', 'Price', '']"
-      actionButton="Buy now"
+      [hideRows]="['plu', 'supplier', 'inStock', 'currency']"
+      [actionButtonFn]="actionButtonFn"
       (actionClicked)="purchaseItem($event)"
-    >
-      <ng-template #rows let-row>
-        <td>{{ row.name }}</td>
-        <td>{{ row.price | currency: row.currency }}</td>
-        <td>
-          <button *ngIf="row.inStock > 0" (click)="purchaseItem(row.plu)">
-            Buy now
-          </button>
-        </td>
-      </ng-template>
-    </app-table>
+    ></app-table>
   `,
+  providers: [CurrencyPipe],
 })
 export class HomeComponent {
   employees = [
@@ -67,9 +59,16 @@ export class HomeComponent {
       price: 8000,
       currency: 'AUD',
     },
-  ];
+  ].map((item) => ({
+    ...item,
+    price: this.currencyPipe.transform(item.price, item.currency),
+  }));
 
   // TODO - transform inventory array to apply currency conversion
+
+  actionButtonFn = (row: any) => (row.inStock > 0 ? 'Buy now' : null);
+
+  constructor(private currencyPipe: CurrencyPipe) {}
 
   purchaseItem(item: any) {
     console.log('handle purchase for', item.plu);
