@@ -6,28 +6,21 @@ import { TableComponentModule } from '../shared/ui/table.component';
 @Component({
   selector: 'app-home',
   template: `
+    <!-- IMPORTANT: This is a bad example to demonstrate why *ngTemplateOutlet is a better option -->
+
     <!-- No templates provided, will use default layout -->
     <app-table [data]="employees"></app-table>
 
     <!-- Basic configured template -->
-    <app-table [data]="employees">
-      <ng-template #headers>
-        <th>First</th>
-        <th>Last</th>
-      </ng-template>
-      <ng-template #rows let-row>
-        <td>{{ row.firstName }}</td>
-        <td>{{ row.lastName }}</td>
-      </ng-template>
-    </app-table>
+    <app-table [data]="employees" [headers]="['First', 'Last']"></app-table>
 
     <!-- Highly configured template with conditional elements -->
-    <app-table [data]="inventory">
-      <ng-template #headers>
-        <th>Item</th>
-        <th>Price</th>
-        <th></th>
-      </ng-template>
+    <app-table
+      [data]="inventory"
+      [headers]="['Item', 'Price', '']"
+      actionButton="Buy now"
+      (actionClicked)="purchaseItem($event)"
+    >
       <ng-template #rows let-row>
         <td>{{ row.name }}</td>
         <td>{{ row.price | currency: row.currency }}</td>
@@ -76,8 +69,10 @@ export class HomeComponent {
     },
   ];
 
-  purchaseItem(plu: number) {
-    console.log('handle purchase for', plu);
+  // TODO - transform inventory array to apply currency conversion
+
+  purchaseItem(item: any) {
+    console.log('handle purchase for', item.plu);
   }
 }
 

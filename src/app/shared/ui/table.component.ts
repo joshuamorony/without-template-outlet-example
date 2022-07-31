@@ -1,48 +1,50 @@
 import { CommonModule } from '@angular/common';
 import {
   Component,
-  ContentChild,
+  EventEmitter,
   Input,
   NgModule,
-  TemplateRef,
+  Output,
 } from '@angular/core';
 
+// IMPORTANT: This is a bad example to demonstrate why *ngTemplateOutlet is a better option
 @Component({
   selector: 'app-table',
   template: `
     <table>
       <tr>
-        <ng-container
-          *ngTemplateOutlet="
-            headers || defaultHeaderTemplate;
-            context: { $implicit: data }
-          "
-        ></ng-container>
+        <ng-container *ngIf="headers; else defaultHeaders">
+          <th *ngFor="let header of headers">
+            {{ header }}
+          </th>
+        </ng-container>
       </tr>
       <tr *ngFor="let row of data">
-        <ng-container
-          *ngTemplateOutlet="
-            rows || defaultRowTemplate;
-            context: { $implicit: row }
-          "
-        ></ng-container>
+        <ng-container *ngFor="let row of row | keyvalue">
+          <td *ngIf="hideRows.indexOf(row.key) > -1">
+            {{ row.value }}
+          </td>
+        </ng-container>
+
+        <td *ngIf="actionButton">
+          <!-- still need the full row here to emit -->
+          <button (click)="actionClicked.emit(row)">{{ actionButton }}</button>
+        </td>
       </tr>
     </table>
 
-    <!-- If no template is provided use keys as headers and display all values -->
-    <ng-template #defaultHeaderTemplate let-data>
+    <ng-template #defaultHeaders>
       <th *ngFor="let header of data[0] | keyvalue">{{ header.key }}</th>
-    </ng-template>
-
-    <ng-template #defaultRowTemplate let-row>
-      <td *ngFor="let row of row | keyvalue">{{ row.value }}</td>
     </ng-template>
   `,
 })
 export class TableComponent {
   @Input() data!: any[];
-  @ContentChild('headers') headers!: TemplateRef<any>;
-  @ContentChild('rows') rows!: TemplateRef<any>;
+  @Input() headers: string[] | undefined;
+  @Input() hideRows: string[] = [];
+  @Input() actionButton: string | undefined;
+
+  @Output() actionClicked = new EventEmitter();
 }
 
 @NgModule({
